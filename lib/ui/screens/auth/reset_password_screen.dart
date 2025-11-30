@@ -1,3 +1,5 @@
+import 'package:casseed/models/auth/reset_password/reset_password_dto.dart';
+import 'package:casseed/providers/auth_provider.dart';
 import 'package:casseed/ui/core/circular_progress_indicator_builder.dart';
 import 'package:casseed/ui/core/labelled_field.dart';
 import 'package:flutter/material.dart';
@@ -71,33 +73,17 @@ class ResetPasswordScreen extends HookConsumerWidget {
 
       isLoading.value = true;
 
-      try {
-        final newPassword = newPasswordController.text;
+      final newPassword = newPasswordController.text;
 
-        // TODO: Replace with actual API call
-        // final resetPasswordDto = ResetPasswordDto(
-        //   token: token,
-        //   newPassword: newPassword,
-        // );
-        // await ref.read(authProvider).resetPassword(resetPasswordDto);
-
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
-
-        // Show success message
-        successMessage.value =
-            'Your password has been reset successfully. You can now log in with your new password.';
-
-        // TODO: Navigate to login after delay
-        // Future.delayed(const Duration(seconds: 2), () {
-        //   Navigator.of(context).pushReplacementNamed('/login');
-        // });
-      } catch (e) {
-        errorMessage.value =
-            'Failed to reset password. The link may be invalid or expired. Please request a new reset link.';
-      } finally {
-        isLoading.value = false;
-      }
+      final resetPasswordDto = ResetPasswordDto(
+        token: token,
+        newPassword: newPassword,
+      );
+      final response = await ref
+          .read(authProvider.notifier)
+          .resetPassword(resetPasswordDto);
+      successMessage.value = response;
+      isLoading.value = true;
     }
 
     // Password strength indicator

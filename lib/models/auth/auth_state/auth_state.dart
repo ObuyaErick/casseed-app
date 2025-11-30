@@ -14,6 +14,4 @@ sealed class AuthState with _$AuthState {
   AuthState._();
 
   bool get isAuthenticated => currentContext != null;
-
-  void clear() {}
 }

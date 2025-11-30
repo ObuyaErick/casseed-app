@@ -1,4 +1,5 @@
 import 'package:casseed/models/auth/forgot_password/forgot_password_dto.dart';
+import 'package:casseed/providers/auth_provider.dart';
 import 'package:casseed/ui/core/circular_progress_indicator_builder.dart';
 import 'package:casseed/ui/core/labelled_field.dart';
 import 'package:flutter/material.dart';
@@ -45,23 +46,12 @@ class ForgotPasswordScreen extends HookConsumerWidget {
 
       isLoading.value = true;
 
-      try {
-        final email = emailController.text.trim().toLowerCase();
-        final forgotPasswordDto = ForgotPasswordDto(email: email);
-        // await ref.read(authProvider).forgotPassword(forgotPasswordDto);
-
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
-
-        // Show success message
-        successMessage.value =
-            'Password reset instructions have been sent to your email address.';
-      } catch (e) {
-        errorMessage.value =
-            'Unable to send reset link. Please check your email and try again.';
-      } finally {
-        isLoading.value = false;
-      }
+      final email = emailController.text.trim().toLowerCase();
+      final forgotPasswordDto = ForgotPasswordDto(email: email);
+      await ref
+          .read(authProvider.notifier)
+          .processForgotPassword(forgotPasswordDto);
+      isLoading.value = false;
     }
 
     return Scaffold(

@@ -1,6 +1,7 @@
 import 'package:casseed/extensions/organization_type_extensions.dart';
 import 'package:casseed/models/auth/organization_type.enum.dart';
 import 'package:casseed/models/auth/register/register_dto.dart';
+import 'package:casseed/providers/auth_provider.dart';
 import 'package:casseed/ui/core/circular_progress_indicator_builder.dart';
 import 'package:casseed/ui/core/labelled_field.dart';
 import 'package:flutter/material.dart';
@@ -173,36 +174,31 @@ class RegisterScreen extends HookConsumerWidget {
 
       isLoading.value = true;
 
-      try {
-        final email = emailController.text.trim().toLowerCase();
-        final password = passwordController.text;
-        final firstName = firstNameController.text.trim();
-        final lastName = lastNameController.text.trim();
-        final phone = phoneController.text.trim().isEmpty
-            ? null
-            : phoneController.text.trim();
-        final organizationName = organizationNameController.text.trim();
-        final organizationType = selectedOrgType.value!;
+      final email = emailController.text.trim().toLowerCase();
+      final password = passwordController.text;
+      final firstName = firstNameController.text.trim();
+      final lastName = lastNameController.text.trim();
+      final phone = phoneController.text.trim().isEmpty
+          ? null
+          : phoneController.text.trim();
+      final organizationName = organizationNameController.text.trim();
+      final organizationType = selectedOrgType.value!;
 
-        final registerDto = RegisterDto(
-          email: email,
-          password: password,
-          firstName: firstName,
-          lastName: lastName,
-          phone: phone,
-          organizationName: organizationName,
-          organizationType: organizationType,
-        );
-        // TODO: await ref.read(authProvider).register(registerDto);
+      final registerDto = RegisterDto(
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+        organizationName: organizationName,
+        organizationType: organizationType,
+      );
+      final response = await ref
+          .read(authProvider.notifier)
+          .register(registerDto);
 
-        await Future.delayed(const Duration(seconds: 2));
-
-        errorMessage.value = 'Registration failed. Please try again.';
-      } catch (e) {
-        errorMessage.value = 'An error occurred. Please try again.';
-      } finally {
-        isLoading.value = false;
-      }
+      errorMessage.value = response.message;
+      isLoading.value = false;
     }
 
     Widget buildStepIndicator() {

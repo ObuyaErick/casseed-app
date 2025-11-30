@@ -1,4 +1,5 @@
 import 'package:casseed/models/auth/change_password/change_password_dto.dart';
+import 'package:casseed/providers/auth_provider.dart';
 import 'package:casseed/ui/core/circular_progress_indicator_builder.dart';
 import 'package:casseed/ui/core/labelled_field.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +20,6 @@ class ChangePasswordScreen extends HookConsumerWidget {
     final obscureCurrentPassword = useState(true);
     final obscureNewPassword = useState(true);
     final obscureConfirmPassword = useState(true);
-    final errorMessage = useState<String?>(null);
-    final successMessage = useState<String?>(null);
     final isLoading = useState(false);
 
     String? validateCurrentPassword(String? value) {
@@ -65,41 +64,26 @@ class ChangePasswordScreen extends HookConsumerWidget {
     }
 
     void handleChangePassword() async {
-      errorMessage.value = null;
-      successMessage.value = null;
-
       if (!formKey.currentState!.validate()) {
         return;
       }
 
       isLoading.value = true;
 
-      try {
-        final currentPassword = currentPasswordController.text;
-        final newPassword = newPasswordController.text;
+      final currentPassword = currentPasswordController.text;
+      final newPassword = newPasswordController.text;
 
-        final changePasswordDto = ChangePasswordDto(
-          currentPassword: currentPassword,
-          newPassword: newPassword,
-        );
-        // await ref.read(authProvider).changePassword(changePasswordDto);
+      final changePasswordDto = ChangePasswordDto(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      await ref.read(authProvider.notifier).changePassword(changePasswordDto);
 
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
-
-        // Show success message
-        successMessage.value = 'Your password has been changed successfully.';
-
-        // Clear form
-        currentPasswordController.clear();
-        newPasswordController.clear();
-        confirmPasswordController.clear();
-      } catch (e) {
-        errorMessage.value =
-            'Failed to change password. Please check your current password and try again.';
-      } finally {
-        isLoading.value = false;
-      }
+      // Clear form
+      currentPasswordController.clear();
+      newPasswordController.clear();
+      confirmPasswordController.clear();
+      isLoading.value = false;
     }
 
     Widget buildPasswordStrengthIndicator(String password) {
@@ -254,14 +238,6 @@ class ChangePasswordScreen extends HookConsumerWidget {
                           ),
                         ),
                         validator: validateCurrentPassword,
-                        onChanged: (_) {
-                          if (errorMessage.value != null) {
-                            errorMessage.value = null;
-                          }
-                          if (successMessage.value != null) {
-                            successMessage.value = null;
-                          }
-                        },
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -297,16 +273,6 @@ class ChangePasswordScreen extends HookConsumerWidget {
                               ),
                             ),
                             validator: validateNewPassword,
-                            onChanged: (value) {
-                              if (errorMessage.value != null) {
-                                errorMessage.value = null;
-                              }
-                              if (successMessage.value != null) {
-                                successMessage.value = null;
-                              }
-                              // Trigger rebuild to update strength indicator
-                              formKey.currentState?.validate();
-                            },
                           ),
                           buildPasswordStrengthIndicator(
                             newPasswordController.text,
@@ -340,87 +306,11 @@ class ChangePasswordScreen extends HookConsumerWidget {
                           ),
                         ),
                         validator: validateConfirmPassword,
-                        onChanged: (_) {
-                          if (errorMessage.value != null) {
-                            errorMessage.value = null;
-                          }
-                          if (successMessage.value != null) {
-                            successMessage.value = null;
-                          }
-                        },
+
                         onFieldSubmitted: (_) => handleChangePassword(),
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Success message
-                    if (successMessage.value != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline,
-                              color: Theme.of(context).colorScheme.primary,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                successMessage.value!,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    // Error message
-                    if (errorMessage.value != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.errorContainer,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              color: Theme.of(context).colorScheme.error,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                errorMessage.value!,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    if (errorMessage.value != null ||
-                        successMessage.value != null)
-                      const SizedBox(height: 16),
 
                     // Change password button
                     SizedBox(

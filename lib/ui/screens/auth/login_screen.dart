@@ -55,27 +55,18 @@ class LoginScreen extends HookConsumerWidget {
 
       isLoading.value = true;
 
-      try {
-        final response = await ref
-            .read(authProvider.notifier)
-            .login(
-              LoginDto(
-                email: emailController.text.trim(),
-                password: passwordController.text,
-              ),
-            );
+      final response = await ref
+          .read(authProvider.notifier)
+          .login(
+            LoginDto(
+              email: emailController.text.trim(),
+              password: passwordController.text,
+            ),
+          );
 
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
+      errorMessage.value = response.message;
 
-        // For demo purposes, show error
-        // In production, handle success/error from API response
-        errorMessage.value = 'Invalid email or password. Please try again.';
-      } catch (e) {
-        errorMessage.value = 'An error occurred. Please try again.';
-      } finally {
-        isLoading.value = false;
-      }
+      isLoading.value = false;
     }
 
     return Scaffold(
