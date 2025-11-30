@@ -1,7 +1,7 @@
 class ApiResponse<P> {
   String status;
   int code;
-  List<P> payload;
+  List<P> data;
   List<String> errors;
   String? scope;
   bool success;
@@ -10,7 +10,7 @@ class ApiResponse<P> {
   ApiResponse({
     required this.status,
     required this.code,
-    required this.payload,
+    required this.data,
     required this.errors,
     required this.scope,
     required this.success,
@@ -19,6 +19,7 @@ class ApiResponse<P> {
 
   bool get hasError => code != 200;
   bool get isSuccessful => code == 200;
+  bool get hasData => data.isNotEmpty;
 
   factory ApiResponse.fromJson(
     Map<String, dynamic> json,
@@ -30,18 +31,21 @@ class ApiResponse<P> {
     final success = json['success'] as bool;
     final tm = json['tm'] as String;
 
-    final dynamicPayload = json['payload'] as List<dynamic>;
-    final dynamicErrors = json['errors'] as List<dynamic>;
+    final dynamicData = json['data'] is List
+        ? json['data'] as List<dynamic>
+        : <dynamic>[];
+    final dynamicErrors = json['errors'] is List
+        ? json['errors'] as List<dynamic>
+        : <dynamic>[];
 
-    final List<P> payload =
-        dynamicPayload.map((json) => fromJsonT(json)).toList();
+    final List<P> data = dynamicData.map((json) => fromJsonT(json)).toList();
 
     final errors = List<String>.from(dynamicErrors);
 
     return ApiResponse(
       status: status,
       code: code,
-      payload: payload,
+      data: data,
       errors: errors,
       scope: scope,
       success: success,

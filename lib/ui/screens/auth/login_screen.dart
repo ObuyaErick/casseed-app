@@ -1,4 +1,5 @@
 import 'package:casseed/models/auth/login/login_dto.dart';
+import 'package:casseed/providers/auth_provider.dart';
 import 'package:casseed/ui/core/circular_progress_indicator_builder.dart';
 import 'package:casseed/ui/core/labelled_field.dart';
 import 'package:flutter/material.dart';
@@ -55,16 +56,14 @@ class LoginScreen extends HookConsumerWidget {
       isLoading.value = true;
 
       try {
-        final loginDto = LoginDto(
-          email: emailController.text.trim(),
-          password: passwordController.text,
-        );
-
-        // TODO: Replace with actual API call
-        // Example:
-        // final response = await ref.read(authProvider).login(
-        //   LoginDto(email: email, password: password),
-        // );
+        final response = await ref
+            .read(authProvider.notifier)
+            .login(
+              LoginDto(
+                email: emailController.text.trim(),
+                password: passwordController.text,
+              ),
+            );
 
         // Simulate API call
         await Future.delayed(const Duration(seconds: 2));

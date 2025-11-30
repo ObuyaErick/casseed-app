@@ -1,17 +1,14 @@
+import 'package:casseed/ui/core/circular_progress_indicator_builder.dart';
 import 'package:casseed/ui/core/pin_field.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:casseed/ui/core/circular_progress_indicator_builder.dart';
 
-class EmailVerificationScreen extends HookConsumerWidget {
-  final String? token;
-  final String email;
+class PhoneVerificationScreen extends HookConsumerWidget {
+  final String phoneNumber;
 
-  const EmailVerificationScreen({super.key, this.token, required this.email});
+  const PhoneVerificationScreen({super.key, required this.phoneNumber});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,33 +17,23 @@ class EmailVerificationScreen extends HookConsumerWidget {
     final successMessage = useState<String?>(null);
     final isResending = useState(false);
 
+    // PIN input controllers (6 digits for phone)
     final pin1Controller = useTextEditingController();
     final pin2Controller = useTextEditingController();
     final pin3Controller = useTextEditingController();
     final pin4Controller = useTextEditingController();
+    final pin5Controller = useTextEditingController();
+    final pin6Controller = useTextEditingController();
 
+    // Focus nodes
     final pin1Focus = useFocusNode();
     final pin2Focus = useFocusNode();
     final pin3Focus = useFocusNode();
     final pin4Focus = useFocusNode();
+    final pin5Focus = useFocusNode();
+    final pin6Focus = useFocusNode();
 
-    // Auto-verify on web if token is provided
-    useEffect(() {
-      if (kIsWeb && token != null && token!.isNotEmpty) {
-        Future.microtask(
-          () => verifyWithToken(
-            token!,
-            isVerifying,
-            errorMessage,
-            successMessage,
-            context,
-          ),
-        );
-      }
-      return null;
-    }, [token]);
-
-    void verifyWithPin() async {
+    void verifyPhone() async {
       errorMessage.value = null;
       successMessage.value = null;
 
@@ -54,10 +41,12 @@ class EmailVerificationScreen extends HookConsumerWidget {
           pin1Controller.text +
           pin2Controller.text +
           pin3Controller.text +
-          pin4Controller.text;
+          pin4Controller.text +
+          pin5Controller.text +
+          pin6Controller.text;
 
-      if (pin.length != 4) {
-        errorMessage.value = 'Please enter the complete 4-digit code';
+      if (pin.length != 6) {
+        errorMessage.value = 'Please enter the complete 6-digit code';
         return;
       }
 
@@ -65,14 +54,13 @@ class EmailVerificationScreen extends HookConsumerWidget {
 
       try {
         // TODO: Replace with actual API call
-        // final verifyEmailDto = VerifyEmailDto(token: pin);
-        // await ref.read(authProvider).verifyEmail(verifyEmailDto);
+        // await ref.read(authProvider).verifyPhone(phoneNumber, pin);
 
         await Future.delayed(const Duration(seconds: 2));
 
-        successMessage.value = 'Email verified successfully!';
+        successMessage.value = 'Phone number verified successfully!';
 
-        // Navigate to dashboard after success
+        // Navigate to next screen
         Future.delayed(const Duration(seconds: 2), () {
           context.go('/dashboard');
         });
@@ -83,19 +71,18 @@ class EmailVerificationScreen extends HookConsumerWidget {
       }
     }
 
-    void resendVerificationCode() async {
+    void resendCode() async {
       errorMessage.value = null;
       successMessage.value = null;
       isResending.value = true;
 
       try {
         // TODO: Replace with actual API call
-        // final resendDto = ResendVerificationDto(email: email);
-        // await ref.read(authProvider).resendVerification(resendDto);
+        // await ref.read(authProvider).resendPhoneVerification(phoneNumber);
 
         await Future.delayed(const Duration(seconds: 1));
 
-        successMessage.value = 'Verification code sent to your email';
+        successMessage.value = 'Verification code sent via SMS';
       } catch (e) {
         errorMessage.value = 'Failed to resend code. Please try again.';
       } finally {
@@ -103,110 +90,6 @@ class EmailVerificationScreen extends HookConsumerWidget {
       }
     }
 
-    // Web view - Show loading/success/error for token verification
-    if (kIsWeb) {
-      return Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 400),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Icon
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: successMessage.value != null
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : errorMessage.value != null
-                          ? Theme.of(context).colorScheme.errorContainer
-                          : Theme.of(context).colorScheme.surfaceContainer,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      successMessage.value != null
-                          ? Icons.check_circle_outline
-                          : errorMessage.value != null
-                          ? Icons.error_outline
-                          : Icons.email_outlined,
-                      size: 40,
-                      color: successMessage.value != null
-                          ? Theme.of(context).colorScheme.primary
-                          : errorMessage.value != null
-                          ? Theme.of(context).colorScheme.error
-                          : Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  Text(
-                    isVerifying.value
-                        ? 'Verifying Email...'
-                        : successMessage.value != null
-                        ? 'Email Verified!'
-                        : errorMessage.value != null
-                        ? 'Verification Failed'
-                        : 'Verify Your Email',
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-
-                  if (isVerifying.value)
-                    buildCircularProgressIndicator(context)
-                  else if (successMessage.value != null)
-                    Column(
-                      children: [
-                        Text(
-                          successMessage.value!,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Redirecting to dashboard...',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-                    )
-                  else if (errorMessage.value != null)
-                    Column(
-                      children: [
-                        Text(
-                          errorMessage.value!,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        FilledButton(
-                          onPressed: () => context.go('/login'),
-                          child: const Text('Go to Login'),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    // Mobile view - PIN entry
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -234,7 +117,7 @@ class EmailVerificationScreen extends HookConsumerWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(
-                      Icons.mark_email_unread_outlined,
+                      Icons.phone_android,
                       size: 40,
                       color: Theme.of(context).colorScheme.primary,
                     ),
@@ -242,14 +125,14 @@ class EmailVerificationScreen extends HookConsumerWidget {
                   const SizedBox(height: 24),
 
                   Text(
-                    'Verify Your Email',
+                    'Verify Your Phone',
                     style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
 
                   Text(
-                    'Enter the 4-digit code sent to',
+                    'Enter the 6-digit code sent to',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -257,7 +140,7 @@ class EmailVerificationScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    email,
+                    phoneNumber,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -265,25 +148,23 @@ class EmailVerificationScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 32),
 
-                  // PIN input fields
+                  // PIN input fields (6 digits)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       PinField(
-                        width: 36,
+                        width: 32,
                         verticalPadding: 10,
                         controller: pin1Controller,
                         focusNode: pin1Focus,
                         nextFocus: pin2Focus,
                         onChanged: (value) {
-                          if (value.isNotEmpty) {
-                            pin2Focus.requestFocus();
-                          }
+                          if (value.isNotEmpty) pin2Focus.requestFocus();
                         },
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       PinField(
-                        width: 36,
+                        width: 32,
                         verticalPadding: 10,
                         controller: pin2Controller,
                         focusNode: pin2Focus,
@@ -297,9 +178,9 @@ class EmailVerificationScreen extends HookConsumerWidget {
                           }
                         },
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       PinField(
-                        width: 36,
+                        width: 32,
                         verticalPadding: 10,
                         controller: pin3Controller,
                         focusNode: pin3Focus,
@@ -313,25 +194,55 @@ class EmailVerificationScreen extends HookConsumerWidget {
                           }
                         },
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       PinField(
-                        width: 36,
+                        width: 32,
                         verticalPadding: 10,
                         controller: pin4Controller,
                         focusNode: pin4Focus,
                         previousFocus: pin3Focus,
+                        nextFocus: pin5Focus,
                         onChanged: (value) {
-                          if (value.isEmpty) {
+                          if (value.isNotEmpty) {
+                            pin5Focus.requestFocus();
+                          } else {
                             pin3Focus.requestFocus();
                           }
                         },
-                        onSubmit: verifyWithPin,
+                      ),
+                      const SizedBox(width: 8),
+                      PinField(
+                        width: 32,
+                        verticalPadding: 10,
+                        controller: pin5Controller,
+                        focusNode: pin5Focus,
+                        previousFocus: pin4Focus,
+                        nextFocus: pin6Focus,
+                        onChanged: (value) {
+                          if (value.isNotEmpty) {
+                            pin6Focus.requestFocus();
+                          } else {
+                            pin4Focus.requestFocus();
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      PinField(
+                        width: 32,
+                        verticalPadding: 10,
+                        controller: pin6Controller,
+                        focusNode: pin6Focus,
+                        previousFocus: pin5Focus,
+                        onChanged: (value) {
+                          if (value.isEmpty) pin5Focus.requestFocus();
+                        },
+                        onSubmit: verifyPhone,
                       ),
                     ],
                   ),
                   const SizedBox(height: 32),
 
-                  // Error/Success messages
+                  // Messages
                   if (errorMessage.value != null)
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -366,7 +277,7 @@ class EmailVerificationScreen extends HookConsumerWidget {
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
-                        ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                        ).colorScheme.primaryContainer.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(
                           color: Theme.of(context).colorScheme.primary,
@@ -401,7 +312,7 @@ class EmailVerificationScreen extends HookConsumerWidget {
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
-                      onPressed: isVerifying.value ? null : verifyWithPin,
+                      onPressed: isVerifying.value ? null : verifyPhone,
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(0, 48),
                         shape: RoundedRectangleBorder(
@@ -413,7 +324,7 @@ class EmailVerificationScreen extends HookConsumerWidget {
                               context,
                               color: Theme.of(context).colorScheme.onSurface,
                             )
-                          : const Text('Verify Email'),
+                          : const Text('Verify Phone'),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -429,13 +340,17 @@ class EmailVerificationScreen extends HookConsumerWidget {
                         ),
                       ),
                       TextButton(
-                        onPressed: isResending.value
-                            ? null
-                            : resendVerificationCode,
+                        onPressed: isResending.value ? null : resendCode,
                         child: isResending.value
-                            ? buildCircularProgressIndicator(
-                                context,
-                                color: Theme.of(context).colorScheme.onSurface,
+                            ? SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
                               )
                             : const Text(
                                 'Resend',
@@ -451,35 +366,5 @@ class EmailVerificationScreen extends HookConsumerWidget {
         ),
       ),
     );
-  }
-}
-
-void verifyWithToken(
-  String token,
-  ValueNotifier<bool> isVerifying,
-  ValueNotifier<String?> errorMessage,
-  ValueNotifier<String?> successMessage,
-  BuildContext context,
-) async {
-  isVerifying.value = true;
-  errorMessage.value = null;
-
-  try {
-    // TODO: Replace with actual API call
-    // final verifyEmailDto = VerifyEmailDto(token: token);
-    // await ref.read(authProvider).verifyEmail(verifyEmailDto);
-
-    await Future.delayed(const Duration(seconds: 2));
-
-    successMessage.value = 'Email verified successfully!';
-
-    // Navigate to dashboard after success
-    Future.delayed(const Duration(seconds: 2), () {
-      context.go('/dashboard');
-    });
-  } catch (e) {
-    errorMessage.value = 'Invalid or expired verification link.';
-  } finally {
-    isVerifying.value = false;
   }
 }

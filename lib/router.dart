@@ -1,6 +1,8 @@
 import 'package:casseed/ui/screens/auth/change_password_screen.dart';
+import 'package:casseed/ui/screens/auth/email_verification_screen.dart';
 import 'package:casseed/ui/screens/auth/forgot_password_screen.dart';
 import 'package:casseed/ui/screens/auth/login_screen.dart';
+import 'package:casseed/ui/screens/auth/phone_verification_screen.dart';
 import 'package:casseed/ui/screens/auth/register_screen.dart';
 import 'package:casseed/ui/screens/auth/reset_password_screen.dart';
 import 'package:casseed/ui/screens/welcome/landing_screen.dart';
@@ -62,6 +64,31 @@ final routerProvider = Provider<GoRouter>((ref) {
           key: state.pageKey,
           child: const ChangePasswordScreen(),
         ),
+      ),
+      GoRoute(
+        path: '/verify-email',
+        name: 'verify-email',
+        pageBuilder: (context, state) {
+          final token = state.uri.queryParameters['token'];
+          final email = state.uri.queryParameters['email'] ?? '';
+          return MaterialPage(
+            key: state.pageKey,
+            child: EmailVerificationScreen(token: token, email: email),
+          );
+        },
+      ),
+
+      // Phone verification
+      GoRoute(
+        path: '/verify-phone',
+        name: 'verify-phone',
+        pageBuilder: (context, state) {
+          final phone = state.uri.queryParameters['phone'] ?? '';
+          return MaterialPage(
+            key: state.pageKey,
+            child: PhoneVerificationScreen(phoneNumber: phone),
+          );
+        },
       ),
 
       // GoRoute(
