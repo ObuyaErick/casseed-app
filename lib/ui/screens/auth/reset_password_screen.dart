@@ -415,7 +415,7 @@ class ResetPasswordScreen extends HookConsumerWidget {
                         ),
                         TextButton(
                           onPressed: () {
-                            context.go("/login");
+                            context.push("/login");
                           },
                           child: const Text(
                             'Log In',

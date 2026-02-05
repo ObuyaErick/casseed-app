@@ -74,7 +74,7 @@ class EmailVerificationScreen extends HookConsumerWidget {
 
         // Navigate to dashboard after success
         Future.delayed(const Duration(seconds: 2), () {
-          context.go('/dashboard');
+          context.push('/dashboard');
         });
       } catch (e) {
         errorMessage.value = 'Invalid or expired code. Please try again.';
@@ -193,7 +193,7 @@ class EmailVerificationScreen extends HookConsumerWidget {
                         ),
                         const SizedBox(height: 24),
                         FilledButton(
-                          onPressed: () => context.go('/login'),
+                          onPressed: () => context.push('/login'),
                           child: const Text('Go to Login'),
                         ),
                       ],
@@ -472,11 +472,6 @@ void verifyWithToken(
     await Future.delayed(const Duration(seconds: 2));
 
     successMessage.value = 'Email verified successfully!';
-
-    // Navigate to dashboard after success
-    Future.delayed(const Duration(seconds: 2), () {
-      context.go('/dashboard');
-    });
   } catch (e) {
     errorMessage.value = 'Invalid or expired verification link.';
   } finally {

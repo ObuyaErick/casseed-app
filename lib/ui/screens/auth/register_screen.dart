@@ -427,6 +427,14 @@ class RegisterScreen extends HookConsumerWidget {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            context.go("/");
+          },
+          icon: Icon(Icons.arrow_back_rounded),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -582,7 +590,7 @@ class RegisterScreen extends HookConsumerWidget {
                         ),
                         TextButton(
                           onPressed: () {
-                            context.go("/login");
+                            context.push("/login");
                           },
                           child: const Text(
                             'Log In',

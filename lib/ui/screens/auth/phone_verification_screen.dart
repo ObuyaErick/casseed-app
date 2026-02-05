@@ -62,7 +62,7 @@ class PhoneVerificationScreen extends HookConsumerWidget {
 
         // Navigate to next screen
         Future.delayed(const Duration(seconds: 2), () {
-          context.go('/dashboard');
+          context.push('/dashboard');
         });
       } catch (e) {
         errorMessage.value = 'Invalid or expired code. Please try again.';

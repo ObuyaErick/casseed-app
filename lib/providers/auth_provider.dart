@@ -114,7 +114,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
       }
     } catch (e) {
-      final errorMessage = "Login failed";
+      final errorMessage = "${e}";
       state = state.copyWith(
         currentContext: null,
         isLoading: false,

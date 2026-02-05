@@ -70,6 +70,14 @@ class LoginScreen extends HookConsumerWidget {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            context.go("/");
+          },
+          icon: Icon(Icons.arrow_back_rounded),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -175,7 +183,7 @@ class LoginScreen extends HookConsumerWidget {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {
-                            context.go("/forgot-password");
+                            context.push("/forgot-password");
                           },
                           child: const Text(
                             'Forgot Password?',
@@ -254,7 +262,7 @@ class LoginScreen extends HookConsumerWidget {
                           ),
                           TextButton(
                             onPressed: () {
-                              context.go("/register");
+                              context.push("/register");
                             },
                             child: const Text(
                               'Sign Up',

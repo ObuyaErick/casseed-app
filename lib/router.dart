@@ -126,7 +126,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
             const SizedBox(height: 24),
             FilledButton(
-              onPressed: () => context.go('/'),
+              onPressed: () => context.push('/'),
               child: const Text('Go Home'),
             ),
           ],

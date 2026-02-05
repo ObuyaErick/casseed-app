@@ -80,26 +80,12 @@ class LandingScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          context.go(
-                            "/verify-email?token=abc123&email=user@example.com",
-                          );
-                        },
-                        child: Text("Verify Email"),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          context.go("/verify-phone?phone=0706087204");
-                        },
-                        child: Text("Verify Phone"),
-                      ),
                       // Get Started button
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
                           onPressed: () {
-                            context.push('/register');
+                            context.go('/register');
                           },
                           style: FilledButton.styleFrom(
                             elevation: 2,
@@ -121,7 +107,7 @@ class LandingScreen extends StatelessWidget {
                         width: double.infinity,
                         child: OutlinedButton(
                           onPressed: () {
-                            context.push('/login');
+                            context.go('/login');
                           },
                           style: OutlinedButton.styleFrom(
                             minimumSize: const Size(0, 48),

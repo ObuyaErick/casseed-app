@@ -59,7 +59,7 @@ class ForgotPasswordScreen extends HookConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            context.go("/login");
+            context.push("/login");
           },
         ),
         elevation: 0,
@@ -245,7 +245,7 @@ class ForgotPasswordScreen extends HookConsumerWidget {
                         ),
                         TextButton(
                           onPressed: () {
-                            context.go("/login");
+                            context.push("/login");
                           },
                           child: const Text(
                             'Log In',
